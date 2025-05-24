@@ -4,6 +4,7 @@ package org.example.subd.model;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.example.subd.enums.Role;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +23,5 @@ public class Position {
     UUID id;
     String name;
 
-    @OneToMany(mappedBy = "position")
-    private List<Employee> employees = new ArrayList<>();
 
 }

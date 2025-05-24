@@ -6,19 +6,18 @@ import lombok.experimental.FieldDefaults;
 import org.example.subd.enums.Role;
 
 import java.math.BigDecimal;
-import java.util.UUID;
+
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class EmployeeDTO {
-    String name;
+public class UserUpdateDto {
+    String full_name;
+    String email;
+    String phone_number;
+    Role role;
     BigDecimal salary;
     String address;
-    String phone;
-    String email;
-    String password;
-    Role role;
 }

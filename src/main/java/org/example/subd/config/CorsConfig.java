@@ -17,7 +17,8 @@ public class CorsConfig {
                         .allowedOrigins("http://localhost:3000") // URL React-приложения
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                         .allowedHeaders("*")
-                        .allowCredentials(true);
+                        .exposedHeaders("Authorization")
+                        .allowCredentials(false); // ❗ для JWT должно быть false
             }
         };
     }

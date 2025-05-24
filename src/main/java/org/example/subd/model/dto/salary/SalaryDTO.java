@@ -25,4 +25,5 @@ public class SalaryDTO {
     Integer purchaseCount;
     Integer productionCount;
     Integer saleCount;
+
 }

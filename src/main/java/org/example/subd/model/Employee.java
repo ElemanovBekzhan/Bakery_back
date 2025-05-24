@@ -30,13 +30,8 @@ public class Employee {
     String phone_number;
     String email;
     String password;
-
     @Enumerated(EnumType.STRING)
     Role role;
-
-    @ManyToOne
-    @JoinColumn(name = "position_id", nullable = false)
-    Position position;
 
 
 

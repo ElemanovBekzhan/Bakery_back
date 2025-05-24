@@ -11,8 +11,11 @@ import org.example.subd.model.dto.salary.SalaryUpdateDTO;
 import org.example.subd.model.mapper.SalaryMapper;
 import org.example.subd.repository.*;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -102,7 +105,7 @@ public class SalaryService {
 
 
     //Выплата всех невыданных зарплат
-    public void issueCalculatedSalaries(){
+    public String issueCalculatedSalaries(){
 
         Budget budget = budgetRepo.findAll().stream().findFirst().orElseThrow(() -> new RuntimeException("Бюджет не найден"));
         List<Salary> toIssue = salaryRepo.findAllByIsIssuedFalse();
@@ -110,7 +113,7 @@ public class SalaryService {
         for(Salary salary : toIssue){
             BigDecimal total = salary.getSalary();
             if(budget.getAmount().compareTo(total) < 0){
-                throw new RuntimeException("Недостаточно средств в бюджете для выплаты сотруднику: " + salary.getEmployee().getFull_name());
+                return "Недостаточно средств";
             }
 
             //Списываем сумму из бюджета
@@ -121,6 +124,7 @@ public class SalaryService {
             salaryRepo.save(salary);
         }
         budgetRepo.save(budget);
+        return "OK";
     }
 
 

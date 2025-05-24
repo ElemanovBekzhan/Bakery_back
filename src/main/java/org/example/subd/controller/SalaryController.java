@@ -35,8 +35,11 @@ public class SalaryController {
 
     @PostMapping("/issue")
     public ResponseEntity<String> issueAllSalaries(){
-        salaryService.issueCalculatedSalaries();
-        return ResponseEntity.ok("Все рассчитанные зарплаты были успешно выплачены");
+        String result = salaryService.issueCalculatedSalaries();
+        if ("OK".equals(result)) {
+            return ResponseEntity.ok("Все рассчитанные зарплаты выданы");
+        }
+        return ResponseEntity.badRequest().body(result);
     }
 
     @GetMapping("/all")

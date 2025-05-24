@@ -13,12 +13,12 @@ import java.util.UUID;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class EmployeeDTO {
-    String name;
+public class UserResponseDto {
+    UUID id;
+    String full_name;
+    String email;
+    String phone_number;
+    String role;
     BigDecimal salary;
     String address;
-    String phone;
-    String email;
-    String password;
-    Role role;
 }

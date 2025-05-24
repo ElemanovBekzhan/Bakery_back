@@ -1,18 +1,18 @@
 package org.example.subd.service;
 
 
+import jakarta.persistence.EntityNotFoundException;
 import org.example.subd.model.Employee;
-import org.example.subd.model.Position;
-import org.example.subd.model.dto.employees.EmployeeDTO;
-import org.example.subd.model.dto.employees.EmployeeSelectListDTO;
+import org.example.subd.model.dto.employees.*;
 import org.example.subd.model.mapper.EmployeeMapper;
 import org.example.subd.repository.EmployeeRepo;
-import org.example.subd.repository.PositionRepo;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class EmployeeService {
@@ -20,20 +20,16 @@ public class EmployeeService {
     private final EmployeeRepo employeeRepo;
     private final EmployeeMapper employeeMapper;
     private final PasswordEncoder passwordEncoder;
-    private final PositionRepo positionRepo;
 
-    public EmployeeService(EmployeeRepo employeeRepo, EmployeeMapper employeeMapper, PasswordEncoder passwordEncoder, PositionRepo positionRepo) {
+    public EmployeeService(EmployeeRepo employeeRepo, EmployeeMapper employeeMapper, PasswordEncoder passwordEncoder) {
         this.employeeRepo = employeeRepo;
         this.employeeMapper = employeeMapper;
         this.passwordEncoder = passwordEncoder;
-        this.positionRepo = positionRepo;
     }
 
     @Transactional
     public void UserReg(EmployeeDTO dto) {
-        Position position = positionRepo.findById(dto.getPositionid()).orElseThrow(() -> new RuntimeException("Position not found"));
-
-        Employee employee = employeeMapper.toEntityEmployee(dto, position);
+        Employee employee = employeeMapper.toEntityEmployee(dto);
         employee.setPassword(passwordEncoder.encode(dto.getPassword()));
         employeeRepo.save(employee);
     }
@@ -44,6 +40,26 @@ public class EmployeeService {
         List<EmployeeSelectListDTO> employees = employeeRepo.findAllEmployeeSelectList();
         return employees;
     }
+
+
+    @Transactional(readOnly = true)
+    public List<UserResponseDto> getUsers(){
+        List<Employee> e = employeeRepo.findAll();
+        List<UserResponseDto> users = employeeMapper.toDtoList(e);
+        return users;
+    }
+
+
+
+    @Transactional
+    public void updateEmployee(UUID id, UserUpdateDto dto){
+        Employee e = employeeRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Сотрудник не найден"));
+        employeeMapper.updateEmployee(e, dto);
+        employeeRepo.save(e);
+    }
+
+
+
 
 
 }
