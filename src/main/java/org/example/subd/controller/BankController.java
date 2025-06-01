@@ -14,12 +14,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BankController {
 
-    @GetMapping("/pay/{id}")
+/*    @GetMapping("/pay/{id}")
     public String paymentHistoryForPay(@PathVariable UUID id,
                                        @RequestParam(value = "payment_date", required = false)
                                        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate Date,
                                        ) {
 
 
-    }
+    }*/
 }
