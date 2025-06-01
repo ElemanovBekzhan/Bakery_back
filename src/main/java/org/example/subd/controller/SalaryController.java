@@ -22,16 +22,19 @@ public class SalaryController {
     private final SalaryRepo salaryRepo;
 
     @PostMapping("/calculated")
-    public ResponseEntity<String> calculatedSalaries(){
-        salaryService.calculateAllSalary();
-        return ResponseEntity.ok("Зарплаты успешно рассчитаны");
+    public ResponseEntity<String> calculatedSalaries(
+            @RequestParam("year") int year,
+            @RequestParam("month") int month
+    ){
+        salaryService.calculateAllSalary(year, month);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping("/pending")
+  /*  @GetMapping("/pending")
     public ResponseEntity<List<SalaryDTO>> getPendingSalaries(){
         List<SalaryDTO> salaries = salaryService.getPending();
         return ResponseEntity.ok(salaries);
-    }
+    }*/
 
     @PostMapping("/issue")
     public ResponseEntity<String> issueAllSalaries(){
@@ -43,8 +46,11 @@ public class SalaryController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<SalaryDTO>> getAllSalaries(){
-        List<SalaryDTO> salaries = salaryService.getAll();
+    public ResponseEntity<List<SalaryDTO>> getAllSalaries(
+            @RequestParam("year") int year,
+            @RequestParam("month") int month
+    ){
+        List<SalaryDTO> salaries = salaryService.getAll(year, month);
         return ResponseEntity.ok(salaries);
     }
 

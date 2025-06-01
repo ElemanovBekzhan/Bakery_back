@@ -27,6 +27,7 @@ public class Salary {
     @ManyToOne
     @JoinColumn(name = "employee_id", nullable = false)
     Employee employee;
+    @Column(name = "salarydate")
     LocalDate salaryDate;
 
     @Column(nullable = false)

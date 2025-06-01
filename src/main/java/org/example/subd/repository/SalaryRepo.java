@@ -18,4 +18,8 @@ public interface SalaryRepo extends JpaRepository<Salary, UUID> {
     Optional<Salary> findTopByEmployeeAndIsIssuedOrderBySalaryDateDesc(Employee employee, Boolean isIssued);
 
     List<Salary> findAllByIsIssuedFalse();
+
+    boolean findAllBySalaryDateBetween(LocalDate fromDate, LocalDate toDate);
+
+    List<Salary> findAllBySalaryDateBetweenOrderBySalary(LocalDate fromDate, LocalDate toDate);
 }

@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class SalaryMapper {
 
 
-    public static SalaryDTO toDto(Salary s) {
+    public SalaryDTO toDto(Salary s) {
         SalaryDTO dto = new SalaryDTO();
         dto.setId(s.getId());
         dto.setEmployeeName(s.getEmployee().getFull_name());
@@ -30,11 +30,11 @@ public class SalaryMapper {
         return dto;
     }
 
-    public static List<SalaryDTO> toDtoList(List<Salary> s) {
+    /*public static List<SalaryDTO> toDtoList(List<Salary> s) {
         return s.stream()
                 .map(SalaryMapper::toDto)
                 .collect(Collectors.toList());
-    }
+    }*/
 
 
 

@@ -1,7 +1,7 @@
 package org.example.subd.service;
 
 
-import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.*;
 import lombok.RequiredArgsConstructor;
 import org.example.subd.model.Budget;
 import org.example.subd.model.Employee;
@@ -24,6 +24,7 @@ import java.util.List;
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,34 +38,41 @@ public class SalaryService {
     private final PurchaseRepo purchaseRepo;
 
 
-    public void calculateAllSalary() {
-        Budget budget = budgetRepo.findAll().stream().findFirst().orElseThrow(()-> new RuntimeException("Бюджет не найден"));
+    public void calculateAllSalary(int year, int month) {
+
+        //Считываем какой месяц/год
+        LocalDate fromDate = LocalDate.of(year, month, 1);
+        LocalDate toDate = fromDate.withDayOfMonth(fromDate.lengthOfMonth());
+
+        if(!salaryRepo.findAllBySalaryDateBetween(fromDate, toDate)){
+            return;
+        }
+
+        Budget budget = budgetRepo.findAll().stream()
+                .findFirst().orElseThrow(()-> new RuntimeException("Бюджет не найден"));
 
         BigDecimal bonusPercent = budget.getBonus();
-
         List<Employee> employeeList = employeeRepo.findAll();
 
         for(Employee employee: employeeList) {
             //Скипнуть если зп уже рассчитана на сегодня
-            boolean alreadyCalculated = salaryRepo.existsByEmployeeAndSalaryDate(employee, LocalDate.now());
-            if(alreadyCalculated) continue;
+            /*boolean alreadyCalculated = salaryRepo.existsByEmployeeAndSalaryDate(employee, LocalDate.now());
+            if(alreadyCalculated) continue;*/
 
             //Найти дату последней выплаты ЗП
-            Optional<Salary> lastSalaryOpt = salaryRepo.findTopByEmployeeAndIsIssuedOrderBySalaryDateDesc(employee, true);
+            Optional<Salary> lastSalaryOpt = salaryRepo
+                    .findTopByEmployeeAndIsIssuedOrderBySalaryDateDesc(employee, true);
 
-            LocalDate fromDate = lastSalaryOpt
+            LocalDate lastIssued = lastSalaryOpt
                     .map(Salary::getSalaryDate)
                     .orElse(LocalDate.of(2000, 1, 1));
 
-            LocalDate toDate = LocalDate.now();
 
             //Подсчет активности сотрудника
-            int purchaseCount = purchaseRepo.countByEmployeeAndCreatedAtBetween(employee, fromDate, toDate);
+            int purchaseCount = purchaseRepo.countByEmployeeAndCreatedAtBetween(employee, lastIssued, toDate);
+            int productionCount = productionRepo.countByEmployeeAndCreatedAtBetween(employee, lastIssued,toDate);
+            int saleCount = saleRepo.countByEmployeeAndCreatedAtBetween(employee, lastIssued,toDate);
 
-            int productionCount = productionRepo.countByEmployeeAndCreatedAtBetween(employee, fromDate,
-                    toDate);
-            int saleCount = saleRepo.countByEmployeeAndCreatedAtBetween(employee, fromDate,
-                    toDate);
 
             int totalActivity = productionCount + saleCount + purchaseCount;
 
@@ -75,20 +83,15 @@ public class SalaryService {
                     .multiply(BigDecimal.valueOf(totalActivity))
                     .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
 
-
             //Штраф, если сотрудник не проявлял активности
-            BigDecimal fine = BigDecimal.ZERO;
-            if(totalActivity == 0){
-                fine = BigDecimal.valueOf(500);
-            }
-
+            BigDecimal fine = totalActivity == 0 ? BigDecimal.valueOf(500) : BigDecimal.ZERO;
 
             //Общая сумма к выплате
             BigDecimal total = baseSalary.add(bonus).subtract(fine);
 
             //Создание записи о зп
             Salary salary = new Salary();
-            salary.setSalaryDate(LocalDate.now());
+            salary.setSalaryDate(fromDate);
             salary.setSalary(total);
             salary.setEmployee(employee);
             salary.setBonus(bonus);
@@ -129,15 +132,23 @@ public class SalaryService {
 
 
 
-    public List<SalaryDTO> getPending(){
+ /*   public List<SalaryDTO> getPending(){
         List<Salary> salaries = salaryRepo.findAllByIsIssuedFalse();
         return salaryMapper.toDtoList(salaries);
-    }
+    }*/
 
 
-    public List<SalaryDTO> getAll(){
-        List<Salary> salaries = salaryRepo.findAll(Sort.by(Sort.Direction.DESC, "salaryDate"));
-        return salaryMapper.toDtoList(salaries);
+    public List<SalaryDTO> getAll(int year, int month){
+//        LocalDate fromDate = LocalDate.of(year, month, 1);
+//        LocalDate toDate = fromDate.withDayOfMonth(fromDate.lengthOfMonth());
+//        List<Salary> salaries = salaryRepo.findAllBySalaryDateBetweenOrderBySalary(fromDate, toDate);
+//        return salaryMapper.toDtoList(salaries);
+        List<Salary> all = salaryRepo.findAll();
+        return all.stream()
+                .filter(s -> s.getSalaryDate().getMonthValue() == month)
+                .filter(s -> s.getSalaryDate().getYear() == year)
+                .map(salaryMapper::toDto)
+                .collect(Collectors.toList());
     }
 
 
